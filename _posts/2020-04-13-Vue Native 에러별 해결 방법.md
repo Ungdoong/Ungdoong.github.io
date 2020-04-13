@@ -27,3 +27,89 @@ _____________
    ```
 
 2. 안드로이드 스튜디오에서 refactor → migrate to androidx 수행
+
+
+
+## 빌드에러 
+
+## : Execution failed for task ':app:generateDebugBuildConfig'.
+
+___________
+
+### 현상
+
+Execution failed for task ':app:generateDebugBuildConfig'.
+
+> java.io.IOException: Unable to delete directory C:\s02p22a107\foowipe\frontend2\android\app\build\generated\source\buildConfig\debug\com.
+
+### 이유
+
+ 이전에 빌드 내용이 잔재해 중복 로드되어 나타남
+
+### 해결 방법
+
+1.  gradlew clean
+
+   ```bash
+   $ cd android
+   $ ./gradlew clean
+   ```
+
+2. build 폴더 삭제
+
+   android > app > build 폴더 삭제
+
+
+
+## 포트가 이미 사용중일 경우
+
+____________
+
+### 해결 방법
+
+ 다른 포트로 실행
+
+```bash
+$ react-native run-android --port=8082
+```
+
+
+
+
+
+## Execution failed for task ':app:packageDebug'
+
+___________
+
+### 현상
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:packageDebug'.
+
+> java.io.IOException: Unable to delete directory C:\s02p22a107\foowipe\frontend2\android\app\build\intermediates\incremental\packageDebug\tmp\debug.
+
+### 이유
+
+ 여러가지 라이브러리를 가져다 쓰는 중에 라이센스 파일 충돌 혹은 라이브러리 중복 로드로 인해 발생
+
+### 해결 방법
+
+ Build.Gradle(:app)의 android 스크립트 내부에 아래의 코드 추가
+
+```
+packagingOptions {
+    exclude 'META-INF/DEPENDENCIES.txt'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/notice.txt'
+    exclude 'META-INF/license.txt'
+    exclude 'META-INF/dependencies.txt'
+    exclude 'META-INF/LGPL2.1'
+}
+```
+
