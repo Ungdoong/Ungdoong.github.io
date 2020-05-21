@@ -1,4 +1,4 @@
-# Sequelize
+# Sequelizer
 
 
 

@@ -21,9 +21,9 @@ $ npm install react-navigation
 - 의존 라이브러리 설치
 
   ```bash
-  $ yarn add react-native-gesture-handler react-native-reanimated react-native-screens react-native-stack
+  $ yarn add react-native-gesture-handler react-native-reanimated react-native-screens react-navigation-stack react-native-safe-area-context
   # or
-  $ npm install react-native-gesture-handler react-native-reanimated react-native-screens react-native-stack
+  $ npm install react-native-gesture-handler react-native-reanimated react-native-screens react-navigation-stack react-native-safe-area-context --save
   ```
 
 - RN >= 0.60의 경우
