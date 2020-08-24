@@ -1,4 +1,4 @@
-# SpringSecurity
+# [공통5~6주차]IT기술동양\_서울\_정택진_SpringSecurity
 
 
 
@@ -23,6 +23,14 @@ ______
 3. [설정하기](#3.-설정하기)
 
    3-1. [의존성 추가](#3-1.-의존성-추가)
+   
+   3-2. [web.xml 설정](#3-2.-web.xml-설정)
+   
+   3-3. [Security 설정](#3-3.-security-설정)
+   
+4. [security.xml](#4.-security.xml)
+
+   4-1. [security:http (springSecurityFilterChain 설정)](#4-1. security:http (springSecurityFilterChain 설정))
 
 
 
@@ -187,6 +195,8 @@ ________
 
 ### 3-1. 의존성 추가
 
+`pom.xml`
+
 ```xml
 <!-- Properties --> 
 <security.version>4.2.7.RELEASE</security.version> 
@@ -219,3 +229,154 @@ ________
 </dependency>
 ```
 
+### 3-2. web.xml 설정
+
+`web.xml`
+
+```xml
+<context-param>
+	<param-name>contextConfigLocation</param-name>
+    <param-value>
+    	classpath:applicationContext.xml
+        classpath:applicationContext-security.xml
+    </param-value>
+</context-param>
+
+<!-- Spring Security -->
+<listener>
+	<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
+</listener>
+<filter>
+	<filter-name>springSecurityFilterChain</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+</filter>
+<filter-mapping>
+	<filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+- **httpSessionEventPublisher**
+
+  한 유저가 다른 브라우저로 동시 로그인하는 것을 막는다
+
+- **DelegatingFilterProxy**
+
+  모든 요청은 이 프록시필터를 거친다. Spring Security는 이를 통해 인증, 인가를 수행
+
+### 
+
+### 3-3. Security 설정
+
+ dispatcher-context와의 별개의 설정(context)이므로 dispatcher-context에서 component-scan을 하고 있었다면, security의 bean들은 이들을 의존성 주입 받을 수 없다.
+
+ 그러므로, 서비스 이하 컴포넌트들은 applicationContext에서 component-scan 하는 것을 추천
+
+`applicationContext-security.xml`
+
+```xml
+<security:http auto-config="true" use-expressions="true"> 
+    <security:csrf disabled="true"/> 
+    <security:intercept-url pattern="/**" access="permitAll" /> 
+    <security:form-login login-page="/login" authentication-success-handler-ref="loginSuccessHandler" 
+                         authentication-failure-handler-ref="loginFailureHandler" login-processing-url="/auth" 
+                         username-parameter="id" password-parameter="pw" /> 
+    <security:logout logout-url="/logout" invalidate-session="true" logout-success-url="/login?status=logout" />
+    <security:session-management invalid-session-url="/login"> 
+        <security:concurrency-control max-sessions="1" error-if-maximum-exceeded="false" /> 
+    </security:session-management> 
+</security:http> 
+
+<!-- secured method --> 
+<security:global-method-security secured-annotations="enabled" /> 
+
+<!-- provider --> 
+<security:authentication-manager> 
+    <security:authentication-provider ref="userAuthHelper" /> 
+</security:authentication-manager> 
+
+<bean id="loginSuccessHandler" class="com.devljh.domain.user.helper.LoginSuccessHandler"> 
+    <property name="defaultTargetUrl" value="/main" /> 
+    <property name="alwaysUseDefaultTargetUrl" value="true" /> 
+</bean> 
+<bean id="loginFailureHandler" class="com.devljh.domain.user.helper.LoginFailureHandler"> 
+    <property name="defaultFailureUrl" value="/login?status=fail" /> 
+</bean> 
+<bean id="userAuthService" class="com.devljh.domain.user.UserAuthService" /> 
+<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" /> 
+<bean id="userAuthProvider" class="com.devljh.domain.user.helper.UserAuthProvider"> 
+    <property name="userDetailsService" ref="userAuthService" /> 
+    <property name="passwordEncoder" ref="passwordEncoder" /> 
+</bean>
+```
+
+
+
+## 4. security.xml
+
+### 4-1. security:http (springSecurityFilterChain 설정)
+
+- `auto-config` ( default : `true` )
+
+  `false`일 경우 `anonymous`, `x509`, `http-basic`, `session-management`, `expression-handler`, `custom-filter`, `port-mappings`, `request-cache`, `remember-me`를 정의해야 함
+
+- `use-expressions`
+
+  스프링 표현식(spEL)의 사용여부
+
+- `csrf`
+
+  csrf 보안 설정 여부
+
+- `intercept-url`
+
+  pattern에 정의 된 경로에 대해 access 권한을 지정(Filter가 감시)
+
+- `form-login`
+
+  - `login-page` : login form 페이지 URL
+
+  - `username-parameter` : form id의 name 속성 값
+
+  - `password-parameter` : form pw의 name 속성 값
+
+  - `login-processing-url` : form action 값(security를 이용해 인증처리)
+
+  - `default-target-url` : 로그인 성공 시 이동 URL
+
+  - `authentication-failure-url` : 로그인 실패 시 이동 URL
+
+  - `always-use-default-target` 
+
+    true - 무조건 `default-target-url`로 이동
+
+    false - `authentication-success-handler`에 설정한 대로 redirect 된다.
+
+  - `authentication-success-handler-ref` : 로그인 성공 시 프로세스, bean id 입력
+
+    - 만약 최종 로그인 일시를 DB에 기록해야 한다면 handler로 처리하는 것이 좋음
+    - `res.sendRedirect` 등으로 처리
+
+  - `authentication-failure-handler-ref` : 로그인 실패 시 프로세스, bean id 입력
+
+- logout
+
+  - `logout-url` : 로그아웃 처리할 URL(security가 알아서 만들기 때문에, 이 경로로 요청만 하면 됨)
+  - `logout-success-url` : 로그아웃 성공 시 이동 URL
+  - `success-handler-ref` : 로그아웃 성공 시 프로세스, bean id 입력
+  - `invalidate-session` : 로그아웃 시 세션 삭제여부
+
+- session-management
+
+  - `invalid-session-url` : invalid session(세션 타임아웃 등) 일 때 이동 URL
+  - `max-sessions` : 최대 허용 가능한 세션 수
+  - `expired-url` : 중복 로그인 발생 시 이동 URL(처음 접속한 세션이 invalidate가 되고 다음 요청 시 invalid-session-url로 이동)
+  - `error-if-maximum-exceeded` : max-sessions을 넘었을 때 접속한 세션을 실패처리할지 여부
+
+
+
+## 출처
+
+______
+
+- https://sjh836.tistory.com/165
