@@ -19,7 +19,7 @@
 text_skin: ocean # "default" (default), "dark", "forest", "ocean", "chocolate", "orange"
 highlight_theme: tomorrow # "default" (default), "tomorrow", "tomorrow-night", "tomorrow-night-eighties", "tomorrow-night-blue", "tomorrow-night-bright"
 url     : "https://ungdoong.github.io"# the base hostname & protocol for your site e.g. https://www.someone.com
-baseurl : "https://ungdoong.github.io"# does not include hostname
+baseurl : "/"# does not include hostname
 title   : "Taekjin Jeong"
 description: ㅇ_ㅇ
 
