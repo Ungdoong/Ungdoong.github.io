@@ -1,4 +1,4 @@
-# [공통5~6주차]IT기술동양\_서울\_정택진_SpringSecurity
+# SpringSecurity
 
 
 
