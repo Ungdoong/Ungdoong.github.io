@@ -21,7 +21,7 @@ highlight_theme: "tomorrow-night-bright" # "default" (default), "tomorrow", "tom
 url     : "https://ungdoong.github.io" # the base hostname & protocol for your site e.g. https://www.someone.com
 baseurl : "/" # does not include hostname
 title   : "FROLOG - FROG's LOG"
-description: "FROG's Daily Log"
+description: "FROG's Daily Challenge Log"
 
 
 ## => Language and Timezone
@@ -37,8 +37,8 @@ author:
   name      : "FROG"
   url       : "https://ungdoong.github.io"
   avatar    : "https://user-images.githubusercontent.com/41600558/91369541-02789380-e847-11ea-96c7-59226aa1485e.jpg" # path or url of avatar image (square)
-  bio       : ""
-  email     :
+  bio       : "매일 새로운 도전을 하는 개구리"
+  email     : "tj913325@gmail.com"
   facebook  : # "user_name" the last part of your profile url, e.g. https://www.facebook.com/user_name
   twitter   : # "user_name" the last part of your profile url, e.g. https://twitter.com/user_name
   weibo     : # "user_id"   the last part of your profile url, e.g. https://www.weibo.com/user_id/profile?...
