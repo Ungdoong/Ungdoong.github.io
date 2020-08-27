@@ -20,23 +20,23 @@ text_skin: "forest" # "default" (default), "dark", "forest", "ocean", "chocolate
 highlight_theme: "tomorrow-night-bright" # "default" (default), "tomorrow", "tomorrow-night", "tomorrow-night-eighties", "tomorrow-night-blue", "tomorrow-night-bright"
 url     : "https://ungdoong.github.io" # the base hostname & protocol for your site e.g. https://www.someone.com
 baseurl : "/" # does not include hostname
-title   : "Taekjin Jeong"
-description: "Taekjin's Blog"
+title   : "FROLOG - FROG's LOG"
+description: "FROG's Daily Log"
 
 
 ## => Language and Timezone
 ##############################
 lang: "ko-KR" # the language of your site, default as "en"
-timezone: # see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for the available values
+timezone: "Asia/Soeul" # see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for the available values
 
 
 ## => Author and Social
 ##############################
 author:
   type      : "person" # "person" (default), "organization"
-  name      : "정택진"
+  name      : "FROG"
   url       : "https://ungdoong.github.io"
-  avatar    : # path or url of avatar image (square)
+  avatar    : "https://user-images.githubusercontent.com/41600558/91369541-02789380-e847-11ea-96c7-59226aa1485e.jpg" # path or url of avatar image (square)
   bio       : ""
   email     :
   facebook  : # "user_name" the last part of your profile url, e.g. https://www.facebook.com/user_name
