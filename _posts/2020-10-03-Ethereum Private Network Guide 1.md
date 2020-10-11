@@ -16,58 +16,9 @@ docker-ethereum(임의명) 폴더를 생성하고 폴더내에서 go-ethereum �
 $ git clone https://github.com/ethereum/go-ethereum
 ```
 
-
-
-## Dockerfile 작성
-
-Dockerfile은 노드를 구성할 환경을 갖춘 이미지를 만들도록 작성합니다.
-
-`Dockerfile`
-
-```dockerfile
-FROM ubuntu
-
-COPY ./go-ethereum /home/go-ethereum
-COPY ./genesis.json /home/eth_localdata/
-WORKDIR /home/go-ethereum/
-
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninsteractive apt-get install -y --no-install-recommends tzdata
-RUN apt-get install -y build-essential libgmp3-dev golang git
-
-RUN git checkout refs/tags/v1.9.22
-RUN make all
-RUN cp build/bin/geth /usr/local/bin/
-RUN cp build/bin/bootnode /usr/local/bin/
-```
-
-Dockerfile의 옵션에 대한 내용은 따로 설명하지 않겠습니다.
-
-해당 파일은 우분투에 geth 실행환경을 조성한 `ethereum` 이미지를 생성합니다.
-
-
-
-## Dockerfile로 이미지 파일 생성
-
-build 명령어를 이용하여 이미지 파일을 생성합니다. -t 옵션은 이미지 이름을 지정하는 것을 의미합니다.
-
-```shell
-$ docker build -t ethereum .
-```
-
-**마지막 마침표(.)는 필수입니다.**
-
-올바르게 생성되었다면 `docker images`명령어를 통해 아래와 같은 화면을 볼 수 있습니다.
-
-<img width="499" alt="제목 없음" src="https://user-images.githubusercontent.com/41600558/94983614-72351900-057f-11eb-8a66-6d69718a1804.png">
-
-
-
 ## genesis.json 생성
 
-json 파일 생성 전, 노드를 구성할 숫자만큼의 폴더를 생성합니다. 노드 2개를 구성하기 위해 eth0_localdata, eth1_localdata 폴더를 생성하고 동일한 genesis.json 파일을 넣어줍니다.
-
-(동일한 genesis.json을 사용하지 않으면 같은 네트워크로 인식하지 않습니다.)
+json 파일 생성 전, docker_ethereum 폴더 내에 genesis.json 파일을 생성합니다.
 
 `genesis.json`
 
@@ -76,6 +27,7 @@ json 파일 생성 전, 노드를 구성할 숫자만큼의 폴더를 생성합�
   "config": {
         "chainId": 921,
         "homesteadBlock": 0,
+      	"eip150Block": 0,
         "eip155Block": 0,
         "eip158Block": 0
     },
@@ -153,6 +105,50 @@ genesis.json
 
 
 
+## Dockerfile 작성
+
+Dockerfile은 노드를 구성할 환경을 갖춘 이미지를 만들도록 작성합니다.
+
+`Dockerfile`
+
+```dockerfile
+FROM ubuntu
+
+COPY ./go-ethereum /home/go-ethereum
+COPY ./genesis.json /home/eth_localdata
+WORKDIR /home/go-ethereum/
+
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninsteractive apt-get install -y --no-install-recommends tzdata
+RUN apt-get install -y build-essential libgmp3-dev golang git iputils-ping
+
+RUN git checkout refs/tags/v1.9.22
+RUN make geth
+RUN cp build/bin/geth /usr/local/bin/
+```
+
+Dockerfile의 옵션에 대한 내용은 따로 설명하지 않겠습니다.
+
+해당 파일은 우분투에 geth 실행환경을 조성한 `ethereum` 이미지를 생성합니다.
+
+
+
+## Dockerfile로 이미지 파일 생성
+
+build 명령어를 이용하여 이미지 파일을 생성합니다. -t 옵션은 이미지 이름을 지정하는 것을 의미합니다.
+
+```shell
+$ docker build -t ethereum .
+```
+
+**마지막 마침표(.)는 필수입니다.**
+
+올바르게 생성되었다면 `docker images`명령어를 통해 아래와 같은 화면을 볼 수 있습니다.
+
+
+
+
+
 ## docker-compose.yml을 이용한 컨테이너 구성 자동화
 
 image를 컨테이너로 실행하기 위해서 도커의 run명령어를 사용하여도 되지만, 매번 실행할 때마다 옵션을 작성하는 건 비효율적이므로 docker-compose.yml을 이용하여 컨에니터 생성 과정을 자동화하겠습니다.
@@ -166,30 +162,46 @@ services:
     eth0:
         image: 'ethereum'
         volumes:
-            - /home/ubuntu/docker_ethereum/eth0_localdata:/home/eth_localdata
+            - /home/ubuntu/docker_ethereum/eth0:/home/eth0_localdata
         tty: true
+        ports:
+            - 8545:8545
+            - 30303:30303
+        networks:
+            - nodes
         environment:
             ENV: ETH0
             RPCPORT: 8545
             PORT: 30303
         container_name: eth0
-        working_dir: /home/eth_localdata
-        command: geth --datadir /home/eth_localdata init /home/eth_localdata/genesis.json
-        command: geth --networkid 921 --maxpeers 30 --datadir /home/eth_localdata --rpc --rpcport 8545 --rpcaddr "0.0.0.0" --rpccorsdomain "*" --rpcapi "admin,db,eth,debug,miner,net,shh,txpool,personal,web3" --port 30303 console 2>> /home/eth_localdata/geth.log
+        command: geth --datadir /home/eth0_localdata init /home/eth_localdata/genesis.json
+        command: geth --datadir /home/eth0_localdata --nodiscover --networkid 921 --port 30303 --rpc --rpcport "8545" --rpcaddr "0.0.0.0" --rpccorsdomain "*" --rpcapi "eth,net,web3,miner,debug,personal,rpc"
+        working_dir: /home/eth0_localdata
     eth1:
         image: 'ethereum'
         volumes:
-            - /home/ubuntu/docker_ethereum/eth1_localdata:/home/eth_localdata
+            - /home/ubuntu/docker_ethereum/eth1:/home/eth1_localdata
         tty: true
+        ports:
+            - 8546:8546
+            - 30304:30304
+        networks:
+            - nodes
         environment:
             ENV: ETH1
             RPCPORT: 8546
             PORT: 30304
         container_name: eth1
-        working_dir: /home/eth_localdata
-        command: geth --datadir /home/eth_localdata init /home/eth_localdata/genesis.json
-        command: geth --networkid 921 --maxpeers 30 --datadir /home/eth_localdata --rpc --rpcport 8546 --rpcaddr "0.0.0.0" --rpccorsdomain "*" --rpcapi "admin,db,eth,debug,miner,net,shh,txpool,personal,web3" --port 30304 console 2>> /home/eth_localdata/geth.log
+        command: geth --datadir /home/eth1_localdata init /home/eth_localdata/genesis.json
+        command: geth --datadir /home/eth1_localdata --nodiscover --networkid 921 --port 30304 --rpc --rpcport "8546" --rpcaddr "0.0.0.0" --rpccorsdomain "*" --rpcapi "eth,net,web3,miner,debug,personal,rpc"
+        working_dir: /home/eth1_localdata
+
+networks:
+    nodes:
+        driver: bridge
 ```
+
+geth_init 컨테이너를 통해 genesis.json 파일을 이용하여 제네시스 블록을 생성한 후, eth0, eth1컨테이너를 이용하여 노드를 생성하기 위한 준비를 하였습니다.
 
 - **version** : [관련 링크](https://docs.docker.com/compose/compose-file/)
 - **tty** : 해당 컨테이너에서 인터프리터를 제공할지에 대한 옵션
