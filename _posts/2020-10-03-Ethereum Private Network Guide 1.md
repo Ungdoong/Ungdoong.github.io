@@ -96,11 +96,7 @@ config 영역은 구성하고자 하는 이더리움 Network의 설정 부분입
 
 ```sh
 $ ls
-Dockerfile  eth0_localdata  eth1_localdata  go-ethereum
-$ ls eth0_localdata/
-genesis.json
-$ ls eth1_localdata/
-genesis.json
+Dockerfile genesis.json  go-ethereum
 ```
 
 
@@ -201,7 +197,7 @@ networks:
         driver: bridge
 ```
 
-geth_init 컨테이너를 통해 genesis.json 파일을 이용하여 제네시스 블록을 생성한 후, eth0, eth1컨테이너를 이용하여 노드를 생성하기 위한 준비를 하였습니다.
+eth0, eth1 각각 genesis.json 파일을 이용하여 제네시스 블록을 생성한 후, 노드를 생성하였습니다.
 
 - **version** : [관련 링크](https://docs.docker.com/compose/compose-file/)
 - **tty** : 해당 컨테이너에서 인터프리터를 제공할지에 대한 옵션
@@ -253,7 +249,7 @@ fa7bfba07fa1        ethereum            "geth --networkid 46…"   About a minut
 $ docker exec -it eth0 /bin/bash
 ```
 
-위 명령어를 통해 node1의 컨테이너 내부 bash를 실행합니다.  다음, 아래 명령어를 통해 실행중인 geth에 접속합니다.
+위 명령어를 통해 eth0 컨테이너 내부 bash를 실행합니다.  다음, 아래 명령어를 통해 실행중인 geth에 접속합니다.
 
 ```shell
 $ geth attach http://localhost:${RPCPORT} console
@@ -298,7 +294,7 @@ true
 
 `static-nodes.json`파일로 자동으로 등록하도록 구성할 수 있습니다.
 
-eth1_localdata 폴더 내에 `static-nodes.json`을 생성하고 eth0의 enode를 입력합니다.
+eth1 컨테이너 내 eth1_localdata 폴더에 `static-nodes.json`을 생성하고 eth0의 enode를 입력합니다.
 
 `static-nodes.json`
 
@@ -308,11 +304,11 @@ eth1_localdata 폴더 내에 `static-nodes.json`을 생성하고 eth0의 enode�
 ]
 ```
 
+이후 네트워크 실행시 피어가 자동으로 등록되어 있는 것을 확인할 수 있습니다.
+
 
 
 여기까지 도커를 이용하여 이더리움 private 네트워크 설치를 완료하였습니다.
-
-다음 가이드에서는 몇 가지 명령어를 통해 설치한 이더리움 private 네트워크가 정상 동작하는지 체크해보도록 하겠습니다.
 
 
 
